@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluation-4</title>
+
+    <style>
+        #container{
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+        #container>div{
+            border: 2px solid rgb(237, 235, 235);
+            text-align: center;
+            border-radius: 12px;
+            padding: 12px;
+        
+            
+        }
+        #pagination{
+            text-align: center;
+            margin-top: 12px;
+        
+        }
+        #pagination>button{
+            margin-left:5px;
+        }
+        select{
+            font-size:20px;
+        }
+    </style>
+
+</head>
+<body>
+
+    <select name="" id="status">
+        <option value="all">all</option>
+        <option value="Open">Open</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Closed">Closed</option>
+    </select>
+
+    <select name="" id=" priority">
+        <option value="all">all</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+    </select>
+
+    <div id="container"></div>
+
+    <div id="pagination"></div>
+</body>
+</html>
+
+<script>
+
+let url = "http://localhost:3000/tasks?_page=1&_limit=4";
+let container = document.getElementById("container");
+
+function displayData(arr){
+    container.innerHTML="";
+arr.forEach((ele)=>{
+    let cart = document.createElement("div");
+
+    let title = document.createElement("h3")
+    title.innerText = ele.title;
+
+   let description = document.createElement("p")
+   description.innerText = ele.description;
+
+   let status = document.createElement("h4")
+   status.innerText = ele.status;
+
+   let dueDate = document.createElement("h5")
+   dueDate.innerText = ele.dueDate;
+
+   let edit = document.createElement("button")
+   edit.innerText="Edit"
+   edit.addEventListener("click",function(){
+     editData()
+   })
+
+   let del = document.createElement("button")
+   del.innerText="Delete"
+   del.addEventListener("click",function(){
+
+   })
+
+   cart.append(title,description,status,dueDate,edit,del)
+   container.append(cart);
+
+})
+
+}
+async function getData(url,queryparams=""){
+
+    try {
+        
+  let res = await fetch(`${url}${queryparams}`)
+  pnation(res.headers.get("X-Total-Count"),4,queryparams);
+  let data = await res.json()
+  console.log(data);
+  displayData(data)
+
+    } catch (error) {
+        console.log(error)
+    }
+
+}
+getData(url)
+
+
+let status = document.getElementById("status")
+status.addEventListener("input", function(){
+    statusVal = status.value;
+    getData(`http://localhost:3000/tasks?_page=1&_limit=4`,`&status_like=${statusVal}`)
+})
+
+// let priority = document.getElementById("priority")
+// priority.addEventListener("input", function(){
+//     priorityVal = priority.value;
+//     getData(`http://localhost:3000/tasks?_page=1&_limit=4`,`&status_like=${priorityVal}`)
+// })
+
+let pagination = document.getElementById("pagination");
+
+function pnation(total,limit,queryparams){
+    pagination.innerHTML="";
+let num = Math.ceil(total/limit);
+
+for(let i=1; i<=num;i++){
+let btn = document.createElement("button")
+btn.innerText=i;
+
+btn.addEventListener("click",function(){
+    getData(`http://localhost:3000/tasks?_page=${i}&_limit=4`,queryparams)
+})
+
+pagination.append(btn)
+
+}
+
+}
+
+pnation();
+
+</script>
